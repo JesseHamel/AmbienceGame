@@ -12,6 +12,9 @@ public class PlayerController : MonoBehaviour {
     private Collider2D myCollider;
     public Text ScoreText;
     private float StartTime;
+    public float Delay;
+    public int JumpPhase;
+    public int MaxJump;
 
 	// Use this for initialization
 	void Start () {
@@ -27,11 +30,16 @@ public class PlayerController : MonoBehaviour {
 
         if (PlayerDeathTime == -1)
         {
-
-            if (Input.GetButtonDown("Jump"))
+            if (JumpPhase < MaxJump)
             {
-                myRigidbody.AddForce(transform.up * PlayerJumpForce);
+                if (Input.GetButtonDown("Jump"))
+                {
+                    myRigidbody.velocity = new Vector2(0f, 0f);
+                    myRigidbody.AddForce(transform.up * PlayerJumpForce);
+                    StartCoroutine(JumpDelay());
+                }
             }
+
 
             myAnim.SetFloat("vVelocity", myRigidbody.velocity.y);
 
@@ -53,6 +61,15 @@ public class PlayerController : MonoBehaviour {
 
     void OnCollisionEnter2D(Collision2D collision)
     {
+        if(collision.gameObject.tag == "Ground")
+        {
+            ContactPoint2D contact = collision.contacts[0];
+            if (Vector3.Dot(contact.normal, Vector3.up) > 0.5)
+            {
+                JumpPhase = 0;
+            }
+        }
+
         if(collision.collider.gameObject.layer == LayerMask.NameToLayer("Enemy"))
         {
 
@@ -72,5 +89,11 @@ public class PlayerController : MonoBehaviour {
             myRigidbody.AddForce(transform.up * PlayerJumpForce);
             myCollider.enabled = false;
         }
+    }
+
+    IEnumerator JumpDelay()
+    {
+        yield return new WaitForSeconds(Delay);
+        JumpPhase = JumpPhase + 1;
     }
 }
