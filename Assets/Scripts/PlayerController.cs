@@ -43,7 +43,7 @@ public class PlayerController : MonoBehaviour {
 
             myAnim.SetFloat("vVelocity", myRigidbody.velocity.y);
 
-            ScoreText.text = (Time.time - StartTime).ToString("0.0");
+            ScoreText.text = ((Time.time - StartTime) * 1000).ToString("0");
         }
         else
         {
