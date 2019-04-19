@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class PlayerController : MonoBehaviour {
 
@@ -15,6 +16,9 @@ public class PlayerController : MonoBehaviour {
     public float Delay;
     public int JumpPhase;
     public int MaxJump;
+    public AudioSource jumpSFX;
+    public AudioSource deathSFX;
+    public AudioSource bgMusic;
 
 	// Use this for initialization
 	void Start () {
@@ -28,16 +32,24 @@ public class PlayerController : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 
+        if (Input.GetKeyUp(KeyCode.Escape))
+        {
+            SceneManager.LoadScene("Title");
+        }
+
         if (PlayerDeathTime == -1)
         {
             if (JumpPhase < MaxJump)
             {
-                if (Input.GetButtonDown("Jump"))
+                if (Input.GetButtonDown("Jump") || Input.GetButtonDown("Fire1"))
                 {
+                    jumpSFX.Play();
+
                     myRigidbody.velocity = new Vector2(0f, 0f);
                     myRigidbody.AddForce(transform.up * PlayerJumpForce);
                     StartCoroutine(JumpDelay());
                 }
+                
             }
 
 
@@ -50,9 +62,7 @@ public class PlayerController : MonoBehaviour {
 
             if(Time.time > PlayerDeathTime + 2)
             {
-
-                Application.LoadLevel(Application.loadedLevel);
-
+                SceneManager.LoadScene(SceneManager.GetActiveScene().name);
             }
             
         }
@@ -88,6 +98,17 @@ public class PlayerController : MonoBehaviour {
             myRigidbody.velocity = Vector2.zero;
             myRigidbody.AddForce(transform.up * PlayerJumpForce);
             myCollider.enabled = false;
+
+            bgMusic.Pause();
+            deathSFX.Play();
+
+            float currentHighScore = PlayerPrefs.GetFloat("HighScore", 0);
+            float currentScore = ((Time.time - StartTime) * 1000);
+
+            if (currentScore > currentHighScore)
+            {
+                PlayerPrefs.SetFloat("HighScore", currentScore);
+            }
         }
     }
 
